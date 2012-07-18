@@ -123,7 +123,7 @@ class Screen:
         self.screen.blit(score1_text, (self.xsize * 0.25, 10))
         self.screen.blit(score2_text, (self.xsize * 0.75, 10))
         pygame.display.update()
-    def collision_check(self):
+    def collision_check(self, speedscale=1.1):
         ballx, bally, ballw, ballh = self.ball.rect
         onex, oney, onew, oneh = self.player1.rect
         twox, twoy, twow, twoh = self.player2.rect
@@ -132,11 +132,11 @@ class Screen:
         if onediff < 0.5:
             if oney < bally < (oney + oneh):
                 # Multiply by 1.1 so the game speeds up a bit
-                self.ball.xspeed *= -1.2
+                self.ball.xspeed *= -1 * speedscale
                 self.angle(self.player1)
         elif twodiff < 0.5:
             if twoy < bally < (twoy + twoh):
-                self.ball.xspeed *= -1
+                self.ball.xspeed *= -1 * speedscale
                 self.angle(self.player2)
         elif ballx <= 0:
             self.player2.score += 1
