@@ -8,7 +8,8 @@ KEY_DICT = {1: KEYS_1, 2: KEYS_2}
 WHITE = (255, 255, 255)
 
 class Player:
-    start_rects = {'L': (5, 245, 5, 30), 'R': (490, 245, 5, 30)}
+    # Height of the paddle is the last element of these tuples
+    start_rects = {'L': (5, 245, 5, 50), 'R': (490, 245, 5, 50)}
     def __init__(self, side, keys):
         self.keys = KEY_DICT[keys]
         self.score = 0
@@ -94,15 +95,29 @@ class Screen:
         if onediff < 0.5:
             if oney < bally < (oney + oneh):
                 self.ball.xspeed *= -1
+                self.angle(self.player1)
         elif twodiff < 0.5:
             if twoy < bally < (twoy + twoh):
                 self.ball.xspeed *= -1
+                self.angle(self.player2)
         elif ballx <= 0:
             print('Player 2 scores!')
             self.ball.start()
         elif ballx >= self.xsize:
             print('Player 1 scores!')
             self.ball.start()
+        elif bally <= 0 or bally >= self.ysize:
+            self.ball.yspeed *= -1
+    def angle(self, player):
+        ballx, bally, ballw, ballh = self.ball.rect
+        px, py, pw, ph = player.rect
+        #pends = (py, py + ph)
+        pcenter = (py + py + ph) / 2
+        # This should scale the distance according to the paddle height
+        d_from_center = abs(bally - pcenter)/(ph / 2)
+        print(d_from_center)
+        self.ball.yspeed += d_from_center * 0.2
+
 
 if __name__ == '__main__':
     play = Screen()
