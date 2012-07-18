@@ -16,7 +16,6 @@ class Player:
     """
     # Height of the paddle is the last element of these tuples
     start_rects = {'L': (5, 245, 5, 50), 'R': (490, 245, 5, 50)}
-    move_dict = {'up': -0.5, 'down': 0.5}
     def __init__(self, side, keys):
         self.keys = KEY_DICT[keys]
         self.score = 0
@@ -26,16 +25,11 @@ class Player:
         self.maxspeed = 2
         self.moving = False
     def start_move(self, direction):
-        self.moving=True
-        self.yspeed = self.move_dict[direction]
+        move_dict = {'up': -0.5, 'down': 0.5}
+        self.moving = True
+        self.yspeed = move_dict[direction]
     def stop(self):
         self.moving = False
-    def command(self, key):
-        direction = self.keys[key]
-        if direction == 'up':
-            self.yspeed -= 1
-        if direction == 'down':
-            self.yspeed += 1
     def move(self):
         x, y, width, height = self.rect
         y += self.yspeed
@@ -77,16 +71,19 @@ class Screen:
     Controls all the game logic and the display.
     """
     def __init__(self, xsize=500, ysize=500):
-        self.xsize = 500
-        self.ysize = 500
+        self.xsize = xsize
+        self.ysize = ysize
         pygame.init()
-        self.screen = pygame.display.set_mode((500, 500))
+        self.screen = pygame.display.set_mode((xsize, ysize))
         self.background = pygame.Surface(self.screen.get_size())
         self.background = self.background.convert()
         self.font = pygame.font.Font(None, 30)
         self.ball = Ball(self.xsize, self.ysize)
         self.player1 = Player('L', 1)
         self.player2 = Player('R', 2)
+        # Draw everything, then wait a bit, so there's less loadlag
+        self.draw_all()
+        pygame.time.wait(1200)
         self.mainloop()
     def mainloop(self):
         while 1:
@@ -124,6 +121,10 @@ class Screen:
         self.screen.blit(score2_text, (self.xsize * 0.75, 10))
         pygame.display.update()
     def collision_check(self, speedscale=1.1):
+        """
+        Check where the ball is relative to the players and walls, and
+        bounce or increment the score accordingly
+        """
         ballx, bally, ballw, ballh = self.ball.rect
         onex, oney, onew, oneh = self.player1.rect
         twox, twoy, twow, twoh = self.player2.rect
@@ -153,9 +154,11 @@ class Screen:
         """
         ballx, bally, ballw, ballh = self.ball.rect
         px, py, pw, ph = player.rect
-        #pends = (py, py + ph)
         pcenter = (py + py + ph) / 2
         # This should scale the distance according to the paddle height
+        # producing a number between 0 and 1
+        # (bally - pcenter) = ball distance from paddle center
+        # (ph / 2) = distance from paddle center to paddle end
         d_from_center = abs(bally - pcenter)/(ph / 2)
         self.ball.yspeed += d_from_center * 0.2
 
