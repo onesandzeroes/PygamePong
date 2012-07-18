@@ -6,16 +6,29 @@ KEYS_1 = {K_w:'up', K_s: 'down'}
 KEYS_2 = {K_UP: 'up', K_DOWN: 'down'}
 KEY_DICT = {1: KEYS_1, 2: KEYS_2}
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
 
 class Player:
+    """Controls the player paddle. Arguments to __init__() are
+    side: either 'L' or 'R', corresponding to left and right
+    keys: a dictionary mapping from two pygame key objects to 'up' and 'down'
+    """
     # Height of the paddle is the last element of these tuples
     start_rects = {'L': (5, 245, 5, 50), 'R': (490, 245, 5, 50)}
+    move_dict = {'up': -0.5, 'down': 0.5}
     def __init__(self, side, keys):
         self.keys = KEY_DICT[keys]
         self.score = 0
         self.rect = self.start_rects[side]
         self.xspeed = 0
         self.yspeed = 0
+        self.maxspeed = 2
+        self.moving = False
+    def start_move(self, direction):
+        self.moving=True
+        self.yspeed = self.move_dict[direction]
+    def stop(self):
+        self.moving = False
     def command(self, key):
         direction = self.keys[key]
         if direction == 'up':
@@ -25,13 +38,24 @@ class Player:
     def move(self):
         x, y, width, height = self.rect
         y += self.yspeed
+        #if y < -2 or y > 480:
+        #    self.moving = False
         self.rect = (x, y, width, height)
-        # Gradually slow down
-        self.yspeed *= 0.95
+        if self.moving and self.yspeed < self.maxspeed:
+            self.yspeed *= 1.01
+        else:
+            # Gradually slow down
+            self.yspeed *= 0.99
         
 
 
 class Ball:
+    """
+    Updates the ball position and restarts it from the center when a
+    point is scored.
+    Takes the screen width and height as arguments, in order to know
+    how to start from the center.
+    """
     def __init__(self, xsize, ysize):
         self.xsize = xsize
         self.ysize = ysize
@@ -46,11 +70,11 @@ class Ball:
         x += self.xspeed
         y += self.yspeed
         self.rect = (x, y, width, height)
-        # Bounce off the walls
-        if x <= 0 or x >= self.xsize:
-            self.xspeed *= -1.5
 
 class Screen:
+    """
+    Controls all the game logic and the display.
+    """
     def __init__(self, xsize=500, ysize=500):
         self.xsize = 500
         self.ysize = 500
@@ -71,9 +95,15 @@ class Screen:
                 if event.type == KEYDOWN:
                     pressed = event.key
                     if pressed in KEYS_1:
-                        self.player1.command(pressed)
+                        self.player1.start_move(KEYS_1[pressed])
                     elif pressed in KEYS_2:
-                        self.player2.command(pressed)
+                        self.player2.start_move(KEYS_2[pressed])
+                if event.type == KEYUP:
+                    pressed = event.key
+                    if pressed in KEYS_1:
+                        self.player1.stop()
+                    if pressed in KEYS_2:
+                        self.player2.stop()
             self.draw_all()
             self.ball.move()
             self.player1.move()
@@ -100,7 +130,8 @@ class Screen:
         twodiff = abs(ballx - twox)
         if onediff < 0.5:
             if oney < bally < (oney + oneh):
-                self.ball.xspeed *= -1
+                # Multiply by 1.1 so the game speeds up a bit
+                self.ball.xspeed *= -1.1
                 self.angle(self.player1)
         elif twodiff < 0.5:
             if twoy < bally < (twoy + twoh):
@@ -115,6 +146,10 @@ class Screen:
         elif bally <= 0 or bally >= self.ysize:
             self.ball.yspeed *= -1
     def angle(self, player):
+        """Cause the ball to bounce off at an angle determined by how
+        far it is from the center of the paddle when it collides.
+        Further from the center = crazier angle
+        """
         ballx, bally, ballw, ballh = self.ball.rect
         px, py, pw, ph = player.rect
         #pends = (py, py + ph)
