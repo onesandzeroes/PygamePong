@@ -3,7 +3,7 @@ from pygame.locals import *
 import random
 
 KEYS_1 = {K_w:'up', K_s: 'down'}
-KEYS_2 = {'up arrow': 'up', 'down arrow': 'down'}
+KEYS_2 = {K_UP: 'up', K_DOWN: 'down'}
 KEY_DICT = {1: KEYS_1, 2: KEYS_2}
 WHITE = (255, 255, 255)
 
@@ -22,25 +22,29 @@ class Player:
         if direction == 'down':
             self.yspeed += 1
     def move(self):
+        x, y, width, height = self.rect
+        y += self.yspeed
+        self.rect = (x, y, width, height)
+        # Gradually slow down
+        self.yspeed *= 0.95
         
 
 
 class Ball:
     def __init__(self, xsize, ysize):
-        self.xspeed = -0.2
-        self.yspeed = 0
         self.xsize = xsize
         self.ysize = ysize
         self.start()
     def start(self):
-        self.pos = (self.xsize / 2, self.ysize / 2)
+        self.rect = (self.xsize / 2, self.ysize / 2, 5, 5)
         start_speed = random.choice([1, -1])
-        self.xspeed *= start_speed
+        self.xspeed = 0.2 * start_speed
+        self.yspeed = 0
     def move(self):
-        x, y = self.pos
+        x, y, width, height = self.rect
         x += self.xspeed
         y += self.yspeed
-        self.pos = (x, y)
+        self.rect = (x, y, width, height)
         # Bounce off the walls
         if x <= 0 or x >= self.xsize:
             self.xspeed *= -1.5
@@ -64,20 +68,41 @@ class Screen:
                     return
                 if event.type == KEYDOWN:
                     pressed = event.key
-                    print(pressed)
                     if pressed in KEYS_1:
-                        self.player1.move(pressed)
+                        self.player1.command(pressed)
                     elif pressed in KEYS_2:
-                        self.player2.move(pressed)
-            self.screen.blit(self.background, (0, 0))
-            # Draw the ball
-            ball_rect = (self.ball.pos[0], self.ball.pos[1], 5, 5)
-            pygame.draw.rect(self.screen, WHITE, ball_rect) 
-            # Draw the player paddle
-            pygame.draw.rect(self.screen, WHITE, self.player1.rect)
-            pygame.draw.rect(self.screen, WHITE, self.player2.rect)
-            pygame.display.update()
+                        self.player2.command(pressed)
+            self.draw_all()
             self.ball.move()
+            self.player1.move()
+            self.player2.move()
+            self.collision_check()
+    def draw_all(self):
+        self.screen.blit(self.background, (0, 0))
+        # Draw the ball
+        pygame.draw.rect(self.screen, WHITE, self.ball.rect) 
+        # Draw the player paddle
+        pygame.draw.rect(self.screen, WHITE, self.player1.rect)
+        pygame.draw.rect(self.screen, WHITE, self.player2.rect)
+        pygame.display.update()
+    def collision_check(self):
+        ballx, bally, ballw, ballh = self.ball.rect
+        onex, oney, onew, oneh = self.player1.rect
+        twox, twoy, twow, twoh = self.player2.rect
+        onediff = abs(ballx - onex)
+        twodiff = abs(ballx - twox)
+        if onediff < 0.5:
+            if oney < bally < (oney + oneh):
+                self.ball.xspeed *= -1
+        elif twodiff < 0.5:
+            if twoy < bally < (twoy + twoh):
+                self.ball.xspeed *= -1
+        elif ballx <= 0:
+            print('Player 2 scores!')
+            self.ball.start()
+        elif ballx >= self.xsize:
+            print('Player 1 scores!')
+            self.ball.start()
 
 if __name__ == '__main__':
     play = Screen()
