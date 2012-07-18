@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import pygame
 from pygame.locals import *
 import random
@@ -131,7 +132,7 @@ class Screen:
         if onediff < 0.5:
             if oney < bally < (oney + oneh):
                 # Multiply by 1.1 so the game speeds up a bit
-                self.ball.xspeed *= -1.1
+                self.ball.xspeed *= -1.2
                 self.angle(self.player1)
         elif twodiff < 0.5:
             if twoy < bally < (twoy + twoh):
