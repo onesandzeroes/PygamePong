@@ -3,11 +3,12 @@ import pygame
 from pygame.locals import *
 import random
 
-KEYS_1 = {K_w:'up', K_s: 'down'}
+KEYS_1 = {K_w: 'up', K_s: 'down'}
 KEYS_2 = {K_UP: 'up', K_DOWN: 'down'}
 KEY_DICT = {1: KEYS_1, 2: KEYS_2}
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+
 
 class Player:
     """Controls the player paddle. Arguments to __init__() are
@@ -48,7 +49,6 @@ class Player:
         else:
             # Gradually slow down
             self.yspeed *= 0.99
-        
 
 
 class Ball:
@@ -81,6 +81,7 @@ class Ball:
             B = random.randint(0, 255)
             self.colour = (R, G, B)
             self.colour_counter = 0
+
 
 class Screen:
     """
@@ -126,7 +127,7 @@ class Screen:
     def draw_all(self):
         self.screen.blit(self.background, (0, 0))
         # Draw the ball
-        pygame.draw.rect(self.screen, self.ball.colour, self.ball.rect) 
+        pygame.draw.rect(self.screen, self.ball.colour, self.ball.rect)
         # Draw the player paddle
         pygame.draw.rect(self.screen, WHITE, self.player1.rect)
         pygame.draw.rect(self.screen, WHITE, self.player2.rect)
@@ -175,7 +176,7 @@ class Screen:
         # producing a number between 0 and 1
         # (bally - pcenter) = ball distance from paddle center
         # (ph / 2) = distance from paddle center to paddle end
-        d_from_center = abs(bally - pcenter)/(ph / 2)
+        d_from_center = abs(bally - pcenter) / (ph / 2)
         self.ball.yspeed += d_from_center * 0.2
 
 
