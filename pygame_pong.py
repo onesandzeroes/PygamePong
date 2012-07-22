@@ -22,10 +22,10 @@ class Player:
         self.rect = self.start_rects[side]
         self.xspeed = 0
         self.yspeed = 0
-        self.maxspeed = 2
+        self.maxspeed = 1
         self.moving = False
     def start_move(self, direction):
-        move_dict = {'up': -0.5, 'down': 0.5}
+        move_dict = {'up': -0.4, 'down': 0.4}
         self.moving = True
         self.yspeed = move_dict[direction]
     def stop(self):
@@ -40,8 +40,11 @@ class Player:
             self.yspeed = 0
             self.moving = False
         self.rect = (x, y, width, height)
-        if self.moving and self.yspeed < self.maxspeed:
-            self.yspeed *= 1.01
+        if self.moving and abs(self.yspeed) < self.maxspeed:
+            if self.yspeed > 0:
+                self.yspeed += 0.01
+            elif self.yspeed < 0:
+                self.yspeed -= 0.01
         else:
             # Gradually slow down
             self.yspeed *= 0.99
