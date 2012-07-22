@@ -59,6 +59,8 @@ class Ball:
         self.xsize = xsize
         self.ysize = ysize
         self.start()
+        self.colour = (255, 0, 0)
+        self.colour_counter = 0
     def start(self):
         self.rect = (self.xsize / 2, self.ysize / 2, 5, 5)
         start_speed = random.choice([1, -1])
@@ -69,6 +71,13 @@ class Ball:
         x += self.xspeed
         y += self.yspeed
         self.rect = (x, y, width, height)
+        self.colour_counter += 1
+        if self.colour_counter == 75:
+            R = random.randint(0, 255)
+            G = random.randint(0, 255)
+            B = random.randint(0, 255)
+            self.colour = (R, G, B)
+            self.colour_counter = 0
 
 class Screen:
     """
@@ -114,7 +123,7 @@ class Screen:
     def draw_all(self):
         self.screen.blit(self.background, (0, 0))
         # Draw the ball
-        pygame.draw.rect(self.screen, WHITE, self.ball.rect) 
+        pygame.draw.rect(self.screen, self.ball.colour, self.ball.rect) 
         # Draw the player paddle
         pygame.draw.rect(self.screen, WHITE, self.player1.rect)
         pygame.draw.rect(self.screen, WHITE, self.player2.rect)
