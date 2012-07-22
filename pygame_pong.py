@@ -33,8 +33,12 @@ class Player:
     def move(self):
         x, y, width, height = self.rect
         y += self.yspeed
-        #if y < -2 or y > 480:
-        #    self.moving = False
+        if y < 5 and self.yspeed < 0:
+            self.moving = False
+            self.yspeed = 0
+        elif y > (495 - height) and self.yspeed > 0:
+            self.yspeed = 0
+            self.moving = False
         self.rect = (x, y, width, height)
         if self.moving and self.yspeed < self.maxspeed:
             self.yspeed *= 1.01
